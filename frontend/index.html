@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airline Reservation System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Add jsPDF library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-plane-departure"></i> Airline Reservation System</h1>
+            <p class="subtitle">Book your flights with ease and comfort</p>
+            <div id="welcomeMessage" style="display: none;">
+                <p class="welcome-text">Welcome, <span id="userName"></span>!</p>
+                <button onclick="handleLogout()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Features Section -->
+            <div class="features">
+                <div class="feature-card">
+                    <i class="fas fa-globe-americas fa-2x"></i>
+                    <h2>Global Coverage</h2>
+                    <p>Access flights to destinations worldwide with our extensive network of partners.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-clock fa-2x"></i>
+                    <h2>24/7 Support</h2>
+                    <p>Round-the-clock customer support to assist you with any queries or concerns.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt fa-2x"></i>
+                    <h2>Secure Booking</h2>
+                    <p>Your data is protected with industry-leading security measures.</p>
+                </div>
+            </div>
+
+            <!-- Login Section -->
+            <div id="loginSection" class="section">
+                <h2><i class="fas fa-user-circle"></i> Login</h2>
+                <form id="loginForm" class="form">
+                    <div class="form-group">
+                        <label for="username"><i class="fas fa-user"></i> Username:</label>
+                        <input type="text" id="username" name="username" required placeholder="Enter your username">
+                    </div>
+                    <div class="form-group">
+                        <label for="password"><i class="fas fa-lock"></i> Password:</label>
+                        <input type="password" id="password" name="password" required placeholder="Enter your password">
+                    </div>
+                    <div class="login-actions">
+                        <button type="submit" class="btn login-btn">
+                            <i class="fas fa-sign-in-alt"></i> Sign In
+                        </button>
+                        <button type="button" class="btn create-account-btn" onclick="showCreateAccountModal()">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Create Account Modal -->
+            <div id="createAccountModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-modal" onclick="closeCreateAccountModal()">&times;</span>
+                    <h2><i class="fas fa-user-plus"></i> Create Account</h2>
+                    <form id="createAccountForm" class="form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="newFirstName">First Name</label>
+                                <input type="text" id="newFirstName" name="firstName" required placeholder="Enter your first name">
+                            </div>
+                            <div class="form-group">
+                                <label for="newLastName">Last Name</label>
+                                <input type="text" id="newLastName" name="lastName" required placeholder="Enter your last name">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newEmail">Email Address</label>
+                            <input type="email" id="newEmail" name="email" required placeholder="Enter your email">
+                        </div>
+                        <div class="form-group">
+                            <label for="newUsername">Username</label>
+                            <input type="text" id="newUsername" name="username" required placeholder="Choose a username">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="newPassword">Password</label>
+                                <input type="password" id="newPassword" name="password" required placeholder="Create a password">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirm your password">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" required placeholder="Enter your phone number">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="submit-btn">
+                                <i class="fas fa-user-plus"></i> Create Account
+                            </button>
+                            <button type="button" class="cancel-btn" onclick="closeCreateAccountModal()">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Flight Booking Section (initially hidden) -->
+            <div id="bookingSection" class="section" style="display: none;">
+                <h2><i class="fas fa-plane"></i> Book Your Flight</h2>
+                <div class="flight-options">
+                    <button onclick="showFlightType('domestic')" class="flight-option-btn">
+                        <i class="fas fa-home"></i> Domestic Flights
+                    </button>
+                    <button onclick="showFlightType('international')" class="flight-option-btn">
+                        <i class="fas fa-globe"></i> International Flights
+                    </button>
+                </div>
+
+                <!-- Domestic Flight Form -->
+                <div id="domesticForm" class="flight-form" style="display: none;">
+                    <h3><i class="fas fa-map-marker-alt"></i> Domestic Flight Booking</h3>
+                    <form id="domesticFlightForm" class="form">
+                        <div class="form-group">
+                            <label for="fromCity"><i class="fas fa-plane-departure"></i> From:</label>
+                            <select id="fromCity" name="fromCity" required>
+                                <option value="">Select City</option>
+                                <option value="delhi">Delhi</option>
+                                <option value="mumbai">Mumbai</option>
+                                <option value="bangalore">Bangalore</option>
+                                <option value="chennai">Chennai</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="toCity"><i class="fas fa-plane-arrival"></i> To:</label>
+                            <select id="toCity" name="toCity" required>
+                                <option value="">Select City</option>
+                                <option value="delhi">Delhi</option>
+                                <option value="mumbai">Mumbai</option>
+                                <option value="bangalore">Bangalore</option>
+                                <option value="chennai">Chennai</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="class"><i class="fas fa-chair"></i> Class:</label>
+                            <select id="class" name="class" required>
+                                <option value="economy">Economy</option>
+                                <option value="business">Business</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i> Search Flights
+                        </button>
+                    </form>
+                    <!-- Flight Results Section -->
+                    <div id="domesticResults" class="flight-results" style="display: none;">
+                        <h3><i class="fas fa-list"></i> Available Flights</h3>
+                        <div class="results-container"></div>
+                    </div>
+                </div>
+
+                <!-- International Flight Form -->
+                <div id="internationalForm" class="flight-form" style="display: none;">
+                    <h3><i class="fas fa-globe-americas"></i> International Flight Booking</h3>
+                    <form id="internationalFlightForm" class="form">
+                        <div class="form-group">
+                            <label for="fromCountry"><i class="fas fa-plane-departure"></i> From:</label>
+                            <select id="fromCountry" name="fromCountry" required>
+                                <option value="">Select Country</option>
+                                <option value="india">India</option>
+                                <option value="usa">USA</option>
+                                <option value="uk">UK</option>
+                                <option value="australia">Australia</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="toCountry"><i class="fas fa-plane-arrival"></i> To:</label>
+                            <select id="toCountry" name="toCountry" required>
+                                <option value="">Select Country</option>
+                                <option value="india">India</option>
+                                <option value="usa">USA</option>
+                                <option value="uk">UK</option>
+                                <option value="australia">Australia</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="intClass"><i class="fas fa-chair"></i> Class:</label>
+                            <select id="intClass" name="class" required>
+                                <option value="economy">Economy</option>
+                                <option value="business">Business</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i> Search Flights
+                        </button>
+                    </form>
+                    <!-- Flight Results Section -->
+                    <div id="internationalResults" class="flight-results" style="display: none;">
+                        <h3><i class="fas fa-list"></i> Available Flights</h3>
+                        <div class="results-container"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p><i class="fas fa-copyright"></i> 2024 Airline Reservation System. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Passenger Details Modal (initially hidden) -->
+    <div id="passengerModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2><i class="fas fa-user-edit"></i> Passenger Details</h2>
+            <form id="passengerForm" class="form">
+                <div class="form-section">
+                    <h3><i class="fas fa-user"></i> Personal Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" name="firstName" required placeholder="Enter your first name">
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" name="lastName" required placeholder="Enter your last name">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" required placeholder="Enter your email">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" required placeholder="Enter your phone number">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="passport">Passport Number</label>
+                            <input type="text" id="passport" name="passport" required placeholder="Enter passport number">
+                        </div>
+                        <div class="form-group">
+                            <label for="dob">Date of Birth</label>
+                            <input type="date" id="dob" name="dob" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" name="address" required placeholder="Enter your full address"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="emergencyContact">Emergency Contact</label>
+                        <input type="tel" id="emergencyContact" name="emergencyContact" required placeholder="Enter emergency contact number">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-cog"></i> Flight Preferences</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="specialAssistance">Special Assistance</label>
+                            <select id="specialAssistance" name="specialAssistance">
+                                <option value="none">No Special Assistance Required</option>
+                                <option value="wheelchair">Wheelchair Assistance</option>
+                                <option value="medical">Medical Assistance</option>
+                                <option value="other">Other Special Requirements</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mealPreference">Meal Preference</label>
+                            <select id="mealPreference" name="mealPreference">
+                                <option value="regular">Regular Meal</option>
+                                <option value="vegetarian">Vegetarian</option>
+                                <option value="vegan">Vegan</option>
+                                <option value="halal">Halal</option>
+                                <option value="kosher">Kosher</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="seatPreference">Seat Preference</label>
+                        <select id="seatPreference" name="seatPreference">
+                            <option value="window">Window Seat</option>
+                            <option value="aisle">Aisle Seat</option>
+                            <option value="middle">Middle Seat</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-credit-card"></i> Payment Information</h3>
+                    <div class="form-group">
+                        <label for="paymentMethod">Payment Method</label>
+                        <select id="paymentMethod" name="paymentMethod" required onchange="handlePaymentMethodChange()">
+                            <option value="">Select Payment Method</option>
+                            <option value="credit">Credit Card</option>
+                            <option value="debit">Debit Card</option>
+                            <option value="upi">UPI</option>
+                        </select>
+                    </div>
+
+                    <!-- Card Details Section -->
+                    <div id="cardDetails" style="display: none;">
+                        <div class="form-group">
+                            <label for="cardNumber">Card Number</label>
+                            <input type="text" id="cardNumber" name="cardNumber" pattern="[0-9]{16}" maxlength="16" placeholder="Enter 16-digit card number">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expiryDate">Expiry Date</label>
+                                <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" maxlength="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="cvv">CVV</label>
+                                <input type="password" id="cvv" name="cvv" pattern="[0-9]{3}" maxlength="3" placeholder="Enter CVV">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cardName">Name on Card</label>
+                            <input type="text" id="cardName" name="cardName" placeholder="Enter name as it appears on card">
+                        </div>
+                    </div>
+
+                    <!-- UPI Details Section -->
+                    <div id="upiDetails" style="display: none;">
+                        <div class="form-group">
+                            <label for="upiId">UPI ID</label>
+                            <input type="text" id="upiId" name="upiId" placeholder="Enter your UPI ID (e.g., name@upi)" pattern="[a-zA-Z0-9._-]+@[a-zA-Z]{3,}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-check-circle"></i> Confirm Booking
+                    </button>
+                    <button type="button" class="cancel-btn" onclick="closeModal()">
+                        <i class="fas fa-times-circle"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Add a variable to track login state and user info
+        let isLoggedIn = false;
+        let currentUser = null;
+        let currentFlightDetails = null;
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Show loading spinner
+            const loginBtn = this.querySelector('button[type="submit"]');
+            const originalText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<div class="loading-spinner"></div>';
+            
+            // Simulate API call
+            setTimeout(() => {
+                if (username && password) {
+                    isLoggedIn = true;
+                    currentUser = {
+                        username: username,
+                        firstName: username.split(' ')[0],
+                        lastName: username.split(' ').slice(1).join(' ') || '',
+                        fullName: username.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+                    };
+                    
+                    // Update UI
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('bookingSection').style.display = 'block';
+                    document.getElementById('welcomeMessage').style.display = 'block';
+                    document.getElementById('userName').textContent = currentUser.fullName;
+                    document.querySelector('.subtitle').style.display = 'none';
+                    
+                    showSuccessMessage('Login successful! Welcome back.');
+                } else {
+                    showErrorMessage('Please enter valid credentials');
+                }
+                loginBtn.innerHTML = originalText;
+            }, 1500);
+        });
+
+        // Handle Book Now button click
+        function handleBookNow(flightNo, from, to, flightClass, price) {
+            if (!isLoggedIn) {
+                showErrorMessage('Please login first to book a flight');
+                return;
+            }
+            
+            // Store flight details
+            currentFlightDetails = { flightNo, from, to, flightClass, price };
+            
+            // Show passenger details modal
+            const modal = document.getElementById('passengerModal');
+            modal.style.display = 'block';
+            modal.style.animation = 'fadeIn 0.3s ease-out';
+        }
+
+        // Close modal with animation
+        function closeModal() {
+            const modal = document.getElementById('passengerModal');
+            modal.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.getElementById('passengerForm').reset();
+                currentFlightDetails = null; // Clear flight details when modal is closed
+            }, 300);
+        }
+
+        // Handle passenger form submission
+        document.getElementById('passengerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!currentFlightDetails) {
+                showErrorMessage('No flight selected. Please try again.');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<div class="loading-spinner"></div>';
+            
+            // Simulate API call
+            setTimeout(() => {
+                const formData = new FormData(this);
+                const passengerDetails = Object.fromEntries(formData.entries());
+                
+                // Combine flight and passenger details
+                const bookingDetails = {
+                    ...currentFlightDetails,
+                    passenger: passengerDetails,
+                    bookingId: generateBookingId(),
+                    bookingDate: new Date().toLocaleDateString(),
+                    bookingTime: new Date().toLocaleTimeString()
+                };
+
+                // Show confirmation
+                showSuccessMessage(`Booking Confirmed! Flight: ${bookingDetails.flightNo}`);
+                
+                // Generate and download PDF ticket
+                generateTicketPDF(bookingDetails);
+                
+                // Close modal and reset form
+                closeModal();
+                submitBtn.innerHTML = originalText;
+            }, 1500);
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('passengerModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Close modal when clicking the X
+        document.querySelectorAll('.close-modal').forEach(button => {
+            button.onclick = function() {
+                const modal = this.closest('.modal');
+                if (modal.id === 'createAccountModal') {
+                    closeCreateAccountModal();
+                } else if (modal.id === 'passengerModal') {
+                    closeModal();
+                }
+            }
+        });
+
+        // Add input validation and formatting
+        document.getElementById('cardNumber').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '').slice(0, 16);
+        });
+
+        document.getElementById('expiryDate').addEventListener('input', function(e) {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2, 4);
+            }
+            this.value = value;
+        });
+
+        document.getElementById('cvv').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '').slice(0, 3);
+        });
+
+        // Show flight type forms with animation
+        function showFlightType(type) {
+            const domesticForm = document.getElementById('domesticForm');
+            const internationalForm = document.getElementById('internationalForm');
+            
+            if (type === 'domestic') {
+                domesticForm.style.display = 'block';
+                internationalForm.style.display = 'none';
+                domesticForm.style.animation = 'fadeInUp 0.5s ease-out';
+            } else {
+                domesticForm.style.display = 'none';
+                internationalForm.style.display = 'block';
+                internationalForm.style.animation = 'fadeInUp 0.5s ease-out';
+            }
+        }
+
+        // Display flight results with animation
+        function displayFlightResults(flights, resultsDiv, from, to, flightClass) {
+            const resultsContainer = resultsDiv.querySelector('.results-container');
+            resultsContainer.innerHTML = '';
+            resultsDiv.style.display = 'block';
+
+            if (flights.length === 0) {
+                resultsContainer.innerHTML = '<p class="no-flights">No flights found for the selected route.</p>';
+                return;
+            }
+
+            flights.forEach((flight, index) => {
+                const flightCard = document.createElement('div');
+                flightCard.className = `flight-card ${!flight.available ? 'unavailable' : ''}`;
+                flightCard.style.animation = `fadeInUp 0.3s ease-out ${index * 0.1}s`;
+                flightCard.innerHTML = `
+                    <div class="flight-info">
+                        <h4><i class="fas fa-plane"></i> Flight ${flight.flightNo}</h4>
+                        <p><i class="fas fa-map-marker-alt"></i> From: ${from}</p>
+                        <p><i class="fas fa-map-marker-alt"></i> To: ${to}</p>
+                        <p><i class="fas fa-clock"></i> Departure: ${flight.departure}</p>
+                        <p><i class="fas fa-clock"></i> Arrival: ${flight.arrival}</p>
+                        <p><i class="fas fa-chair"></i> Class: ${flightClass}</p>
+                        <p class="price"><i class="fas fa-tag"></i> ₹${flight.price}</p>
+                        ${!flight.available ? '<p class="unavailable-text"><i class="fas fa-exclamation-circle"></i> Currently Unavailable</p>' : ''}
+                    </div>
+                    ${flight.available ? 
+                        `<button onclick="handleBookNow('${flight.flightNo}', '${from}', '${to}', '${flightClass}', ${flight.price})" class="book-btn">
+                            <i class="fas fa-ticket-alt"></i> Book Now
+                        </button>` :
+                        `<button class="book-btn unavailable-btn" disabled>
+                            <i class="fas fa-ban"></i> Unavailable
+                        </button>`
+                    }
+                `;
+                resultsContainer.appendChild(flightCard);
+            });
+        }
+
+        // Show success message
+        function showSuccessMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'success-message';
+            messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            document.querySelector('.container').insertBefore(messageDiv, document.querySelector('main'));
+            setTimeout(() => messageDiv.remove(), 3000);
+        }
+
+        // Show error message
+        function showErrorMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'error-message';
+            messageDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+            document.querySelector('.container').insertBefore(messageDiv, document.querySelector('main'));
+            setTimeout(() => messageDiv.remove(), 3000);
+        }
+
+        // Handle domestic flight form submission
+        document.getElementById('domesticFlightForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fromCity = document.getElementById('fromCity').value;
+            const toCity = document.getElementById('toCity').value;
+            const flightClass = document.getElementById('class').value;
+            
+            if (fromCity === toCity) {
+                showErrorMessage('Departure and arrival cities cannot be the same');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<div class="loading-spinner"></div>';
+            
+            // Simulate API call with shorter timeout
+            setTimeout(() => {
+                const route = `${fromCity}-${toCity}`;
+                const flights = [
+                    {
+                        flightNo: 'AI101',
+                        departure: '08:00 AM',
+                        arrival: '10:00 AM',
+                        price: 5000,
+                        available: true
+                    },
+                    {
+                        flightNo: 'AI102',
+                        departure: '12:00 PM',
+                        arrival: '02:00 PM',
+                        price: 5500,
+                        available: true
+                    },
+                    {
+                        flightNo: 'AI103',
+                        departure: '04:00 PM',
+                        arrival: '06:00 PM',
+                        price: 6000,
+                        available: true
+                    }
+                ];
+                
+                const resultsDiv = document.getElementById('domesticResults');
+                displayFlightResults(flights, resultsDiv, fromCity, toCity, flightClass);
+                submitBtn.innerHTML = originalText;
+            }, 500); // Reduced timeout to 500ms
+        });
+
+        // Handle international flight form submission
+        document.getElementById('internationalFlightForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fromCountry = document.getElementById('fromCountry').value;
+            const toCountry = document.getElementById('toCountry').value;
+            const flightClass = document.getElementById('intClass').value;
+            
+            if (fromCountry === toCountry) {
+                showErrorMessage('Departure and arrival countries cannot be the same');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<div class="loading-spinner"></div>';
+            
+            // Simulate API call with shorter timeout
+            setTimeout(() => {
+                const route = `${fromCountry}-${toCountry}`;
+                const flights = [
+                    {
+                        flightNo: 'AI201',
+                        departure: '09:00 AM',
+                        arrival: '03:00 PM',
+                        price: 25000,
+                        available: true
+                    },
+                    {
+                        flightNo: 'AI202',
+                        departure: '02:00 PM',
+                        arrival: '08:00 PM',
+                        price: 28000,
+                        available: true
+                    },
+                    {
+                        flightNo: 'AI203',
+                        departure: '08:00 PM',
+                        arrival: '02:00 AM',
+                        price: 30000,
+                        available: true
+                    }
+                ];
+                
+                const resultsDiv = document.getElementById('internationalResults');
+                displayFlightResults(flights, resultsDiv, fromCountry, toCountry, flightClass);
+                submitBtn.innerHTML = originalText;
+            }, 500); // Reduced timeout to 500ms
+        });
+
+        // Generate unique booking ID
+        function generateBookingId() {
+            return 'BK' + Date.now().toString().slice(-6) + Math.random().toString(36).substr(2, 3).toUpperCase();
+        }
+
+        // Generate and download PDF ticket
+        function generateTicketPDF(bookingDetails) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Add airline logo and header
+            doc.setFontSize(24);
+            doc.setTextColor(52, 152, 219);
+            doc.text('Airline Reservation System', 105, 20, { align: 'center' });
+            
+            // Add ticket title
+            doc.setFontSize(18);
+            doc.setTextColor(44, 62, 80);
+            doc.text('Flight Ticket', 105, 35, { align: 'center' });
+
+            // Add booking details
+            doc.setFontSize(12);
+            doc.setTextColor(44, 62, 80);
+            
+            // Booking Information
+            doc.setFont(undefined, 'bold');
+            doc.text('Booking Information:', 20, 50);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Booking ID: ${bookingDetails.bookingId}`, 20, 60);
+            doc.text(`Booking Date: ${bookingDetails.bookingDate}`, 20, 70);
+            doc.text(`Booking Time: ${bookingDetails.bookingTime}`, 20, 80);
+
+            // Flight Information
+            doc.setFont(undefined, 'bold');
+            doc.text('Flight Information:', 20, 100);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Flight Number: ${bookingDetails.flightNo}`, 20, 110);
+            doc.text(`From: ${bookingDetails.from}`, 20, 120);
+            doc.text(`To: ${bookingDetails.to}`, 20, 130);
+            doc.text(`Class: ${bookingDetails.flightClass}`, 20, 140);
+            doc.text(`Price: ₹${bookingDetails.price}`, 20, 150);
+
+            // Passenger Information
+            doc.setFont(undefined, 'bold');
+            doc.text('Passenger Information:', 20, 170);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Name: ${bookingDetails.passenger.firstName} ${bookingDetails.passenger.lastName}`, 20, 180);
+            doc.text(`Email: ${bookingDetails.passenger.email}`, 20, 190);
+            doc.text(`Phone: ${bookingDetails.passenger.phone}`, 20, 200);
+            doc.text(`Passport: ${bookingDetails.passenger.passport}`, 20, 210);
+
+            // Add QR Code placeholder
+            doc.setFont(undefined, 'bold');
+            doc.text('Scan for Boarding Pass', 150, 170);
+            doc.setFont(undefined, 'normal');
+            doc.text('(QR Code will be available at check-in)', 150, 180);
+
+            // Add footer
+            doc.setFontSize(10);
+            doc.setTextColor(127, 140, 141);
+            doc.text('Thank you for choosing our airline!', 105, 280, { align: 'center' });
+            doc.text('For any assistance, please contact our 24/7 customer support.', 105, 285, { align: 'center' });
+
+            // Save the PDF
+            doc.save(`ticket_${bookingDetails.bookingId}.pdf`);
+
+            // Show download success message
+            showSuccessMessage('Ticket downloaded successfully!');
+        }
+
+        // Handle payment method change
+        function handlePaymentMethodChange() {
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const cardDetails = document.getElementById('cardDetails');
+            const upiDetails = document.getElementById('upiDetails');
+
+            // Hide all payment sections first
+            cardDetails.style.display = 'none';
+            upiDetails.style.display = 'none';
+
+            // Show relevant section based on selection
+            if (paymentMethod === 'credit' || paymentMethod === 'debit') {
+                cardDetails.style.display = 'block';
+                // Make card fields required
+                document.getElementById('cardNumber').required = true;
+                document.getElementById('expiryDate').required = true;
+                document.getElementById('cvv').required = true;
+                document.getElementById('cardName').required = true;
+                // Make UPI field not required
+                document.getElementById('upiId').required = false;
+            } else if (paymentMethod === 'upi') {
+                upiDetails.style.display = 'block';
+                // Make UPI field required
+                document.getElementById('upiId').required = true;
+                // Make card fields not required
+                document.getElementById('cardNumber').required = false;
+                document.getElementById('expiryDate').required = false;
+                document.getElementById('cvv').required = false;
+                document.getElementById('cardName').required = false;
+            }
+        }
+
+        // Add input validation for UPI ID
+        document.getElementById('upiId').addEventListener('input', function(e) {
+            const upiId = this.value;
+            const upiPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z]{3,}$/;
+            
+            if (upiId && !upiPattern.test(upiId)) {
+                this.setCustomValidity('Please enter a valid UPI ID (e.g., name@upi)');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // Show Create Account Modal
+        function showCreateAccountModal() {
+            const modal = document.getElementById('createAccountModal');
+            modal.style.display = 'block';
+            modal.style.animation = 'fadeIn 0.3s ease-out';
+        }
+
+        // Close Create Account Modal
+        function closeCreateAccountModal() {
+            const modal = document.getElementById('createAccountModal');
+            modal.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.getElementById('createAccountForm').reset();
+            }, 300);
+        }
+
+        // Handle Create Account Form Submission
+        document.getElementById('createAccountForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const username = document.getElementById('newUsername').value;
+            const firstName = document.getElementById('newFirstName').value;
+            const lastName = document.getElementById('newLastName').value;
+            
+            if (password !== confirmPassword) {
+                showErrorMessage('Passwords do not match');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<div class="loading-spinner"></div>';
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Auto login after account creation
+                isLoggedIn = true;
+                currentUser = {
+                    username: username,
+                    firstName: firstName,
+                    lastName: lastName,
+                    fullName: `${firstName} ${lastName}`
+                };
+                
+                // Update UI
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('bookingSection').style.display = 'block';
+                document.getElementById('welcomeMessage').style.display = 'block';
+                document.getElementById('userName').textContent = currentUser.fullName;
+                document.querySelector('.subtitle').style.display = 'none';
+                
+                showSuccessMessage('Account created successfully! Welcome to Airline Reservation System.');
+                closeCreateAccountModal();
+                submitBtn.innerHTML = originalText;
+            }, 1500);
+        });
+
+        // Handle Logout
+        function handleLogout() {
+            isLoggedIn = false;
+            currentUser = null;
+            
+            // Update UI
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('bookingSection').style.display = 'none';
+            document.getElementById('welcomeMessage').style.display = 'none';
+            document.querySelector('.subtitle').style.display = 'block';
+            
+            // Reset forms
+            document.getElementById('loginForm').reset();
+            document.getElementById('createAccountForm').reset();
+            
+            showSuccessMessage('Logged out successfully!');
+        }
+    </script>
+</body>
+</html> 

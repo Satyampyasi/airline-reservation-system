@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airline Reservation System - Web Version</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Login Section -->
+        <div id="loginSection" class="section">
+            <div class="login-container">
+                <h2>Login</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn">Sign In</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Flight Selection Section (Initially Hidden) -->
+        <div id="flightSection" class="section hidden">
+            <div class="flight-types">
+                <div class="flight-options">
+                    <h3>Flight Types</h3>
+                    <div class="flight-type-buttons">
+                        <button id="domesticBtn" class="btn">Domestic Flights</button>
+                        <button id="internationalBtn" class="btn">International Flights</button>
+                    </div>
+                </div>
+                <div class="class-options">
+                    <h3>Class Selection</h3>
+                    <div class="class-buttons">
+                        <button id="economyBtn" class="btn">Economy Class</button>
+                        <button id="businessBtn" class="btn">Business Class</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flight Table Section -->
+            <div class="flight-table-container">
+                <h3>Available Flights</h3>
+                <table id="flightTable">
+                    <thead>
+                        <tr>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Price</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="flightTableBody">
+                        <!-- Flight data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Booking Confirmation Section (Initially Hidden) -->
+        <div id="bookingSection" class="section hidden">
+            <div class="booking-details">
+                <h2>Booking Details</h2>
+                <div id="bookingInfo"></div>
+                <button id="confirmBooking" class="btn">Confirm Booking</button>
+                <button id="cancelBooking" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
